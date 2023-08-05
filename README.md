@@ -3,7 +3,7 @@
 ## Set Python path
 * Linux or MACOS
     ```shell=
-    export PYTHONPATH="${PYTHONPATH}:path/to/SelfDrivingCar"
+    export PYTHONPATH="${PYTHONPATH}:path/to/TorcsBot"
     ```
 
 ## Run DDPG
