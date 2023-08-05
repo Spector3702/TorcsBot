@@ -11,3 +11,9 @@
     ```python=
     python TORCS_DDPG/train.py
     ```
+
+## Run NEAT
+* Train
+    ```python=
+    python TORCS_NEAT/train.py
+    ```
