@@ -18,7 +18,7 @@ FOLDER_NAME = "TORCS_DDPG"
 def train(device):
     cont = False #Dont forget to change start sigma
     train_all = True #Set True if train all network, False if train only break part of the network(Dont forget to change clip_grad!)
-    env = TorcsEnv(path="/usr/local/share/games/torcs/config/raceman/quickrace.xml")
+    env = TorcsEnv(path="torcs_env/quickrace.xml")
     insize = env.observation_space.shape[0]
     outsize = env.action_space.shape[0]
 
