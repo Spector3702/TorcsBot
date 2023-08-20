@@ -18,23 +18,18 @@ def test(device):
     print("Entered test function")
     
     env = gymt.TorcsEnv(path="torcs_env/quickrace.xml")
-    print("Environment initialized")
     
     insize = env.observation_space.shape[0]
     outsize = env.action_space.shape[0]
-    print(f"Insize: {insize}, Outsize: {outsize}")
     
     valuenet = CriticNetwork(insize, outsize)
     policynet = ActorNetwork(insize)
     agent = Ddpg(valuenet, policynet, buffersize=1)
-    print("Agent initialized")
 
-    agent.load_state_dict(torch.load(f'{FOLDER_NAME}/best_agent_dict'))
+    agent.load_state_dict(torch.load(f'{FOLDER_NAME}/best_agent_dict', map_location=torch.device(device)))
     agent.to(device)
-    print("Agent state loaded and moved to device")
 
     state = env.reset(relaunch=True, render=True)
-    print("Environment reset")
 
     while True:
         torch_state = agent._totorch(state, torch.float32).view(1, -1)
