@@ -30,7 +30,13 @@ jobs:
     - name: Install Python dependencies
       run: |
         pip3 install numpy torch torchvision torchaudio gym
-  
+    
+    - name: Setup xvfb
+      run: |
+        sudo apt-get install -y xvfb
+        export DISPLAY=:99
+        Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+    
     - name: Set PYTHONPATH and run the script
       run: |
         export PYTHONPATH="${PYTHONPATH}:$(pwd)"
