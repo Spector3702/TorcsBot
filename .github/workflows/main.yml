@@ -2,8 +2,6 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
@@ -36,4 +34,4 @@ jobs:
     - name: Set PYTHONPATH and run the script
       run: |
         export PYTHONPATH="${PYTHONPATH}:$(pwd)"
-        python TORCS_DDPG/test.py
+        python TORCS_DDPG/test.py --device cpu
