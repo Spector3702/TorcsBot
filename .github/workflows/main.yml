@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      DISPLAY: :99
 
     steps:
     - uses: actions/checkout@v2
@@ -20,6 +22,11 @@ jobs:
         wget "http://nz.archive.ubuntu.com/ubuntu/pool/main/libx/libxxf86vm/libxxf86vm-dev_1.1.4-1build3_amd64.deb"
         sudo dpkg -i libxxf86vm-dev_1.1.4-1build3_amd64.deb
 
+    - name: Setup xvfb
+      run: |
+        sudo apt-get install -y xvfb
+        Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+
     - name: Clone and configure gym_torcs
       run: |
         git clone https://github.com/ugo-nama-kun/gym_torcs.git
@@ -30,12 +37,6 @@ jobs:
     - name: Install Python dependencies
       run: |
         pip3 install numpy torch torchvision torchaudio gym
-    
-    - name: Setup xvfb
-      run: |
-        sudo apt-get install -y xvfb
-        export DISPLAY=:99
-        Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
     
     - name: Set PYTHONPATH and run the script
       run: |
