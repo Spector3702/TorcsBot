@@ -48,7 +48,7 @@ def train(device):
 
     if train_all == False:
         agent.policynet.init_brake()
-    
+
     agent.to(device)
 
     if cont:
@@ -63,9 +63,9 @@ def train(device):
     for eps in range(hyprm.episodes):
         state = env.reset(relaunch= True, render=False, sampletrack=True)
         episode_reward = 0
-
-        # sigma = (hyprm.start_sigma-hyprm.end_sigma)*(max(0, 1-eps/hyprm.sigma_episode)) + hyprm.end_sigma
-        # randomprocess = OrnsteinUhlenbeckProcess(hyprm.theta, sigma, outsize)
+        
+        #sigma = (hyprm.start_sigma-hyprm.end_sigma)*(max(0, 1-eps/hyprm.sigma_episode)) + hyprm.end_sigma
+        #randomprocess = OrnsteinUhlenbeckProcess(hyprm.theta, sigma, outsize)
 
         for i in range(hyprm.maxlength):
             torch_state = agent._totorch(state, torch.float32).view(1, -1)
@@ -79,7 +79,7 @@ def train(device):
             episode_reward += reward
             datalog["epsiode length"].append(i)
             datalog["total reward"].append(episode_reward)
-
+            
             if len(agent.buffer) > hyprm.batchsize:
                 # for params in agent.policynet.brake.parameters():
                 #     print(params)
@@ -92,7 +92,8 @@ def train(device):
             if done:
                 break
             state = next_state
-            
+
+
         average_reward = torch.mean(torch.tensor(datalog["total reward"][-20:])).item()
         reward_list.append(average_reward)
         # with open("reward_list", "wb") as fp:
