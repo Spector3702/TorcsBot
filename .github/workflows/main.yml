@@ -41,6 +41,7 @@ jobs:
         cd gym_torcs/vtorcs-RL-color/
         chmod +x ./configure
         ./configure --x-libraries=/usr/lib/
+        make
 
     - name: Install Python dependencies
       run: |
