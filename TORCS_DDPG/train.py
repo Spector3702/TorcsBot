@@ -16,8 +16,8 @@ import json
 FOLDER_NAME = "TORCS_DDPG"
 
 def train(device):
-    cont = False #Dont forget to change start sigma
-    train_all = True #Set True if train all network, False if train only break part of the network(Dont forget to change clip_grad!)
+    cont = False  # Dont forget to change start sigma
+    train_all = True  # Set True if train all network, False if train only break part of the network(Dont forget to change clip_grad!)
     env = TorcsEnv(path="torcs_env/quickrace.xml")
     insize = env.observation_space.shape[0]
     outsize = env.action_space.shape[0]
@@ -41,57 +41,44 @@ def train(device):
     hyprm = HyperParams(**hyperparams)
 
     datalog = defaultdict(list)
-    
     valuenet = CriticNetwork(insize, outsize)
     policynet = ActorNetwork(insize)
     agent = Ddpg(valuenet, policynet, buffersize=hyprm.buffersize)
     agent.policynet.change_grad_all_except_brake(train_all)
+
     if train_all == False:
         agent.policynet.init_brake()
+    
     agent.to(device)
+
     if cont:
-        agent.load_state_dict(torch.load('best_agent_dict'))
+        agent.load_state_dict(torch.load(f'{FOLDER_NAME}best_agent_dict'))
         # agent.opt_policy.load_state_dict(torch.load('best_agent_policy_opt'))
         # agent.opt_value.load_state_dict(torch.load('best_agent_value_opt'))
 
-    
     reward_list = []
     td_list = []
     best_reward = -np.inf
 
     for eps in range(hyprm.episodes):
-        #print("Im here too")
         state = env.reset(relaunch= True, render=False, sampletrack=True)
         episode_reward = 0
-        episode_value = 0
-        sigma = (hyprm.start_sigma-hyprm.end_sigma)*(max(0, 1-eps/hyprm.sigma_episode)) + hyprm.end_sigma
-        randomprocess = OrnsteinUhlenbeckProcess(hyprm.theta, sigma, outsize)
+
+        # sigma = (hyprm.start_sigma-hyprm.end_sigma)*(max(0, 1-eps/hyprm.sigma_episode)) + hyprm.end_sigma
+        # randomprocess = OrnsteinUhlenbeckProcess(hyprm.theta, sigma, outsize)
+
         for i in range(hyprm.maxlength):
-            #print("Start iteration")
             torch_state = agent._totorch(state, torch.float32).view(1, -1)
             action, value = agent.act(torch_state)
-            #print("Once: ", action[2])
             action =  action.to("cpu").squeeze() # + randomprocess.noise() 
             action.clamp_(-1, 1)
-            #print("Sonra: ", action[2])
-            #print("Once: ", action)
-            #print("Sonra: ", action_new)
-            #action[1] = (action[1]+1)/2
             action = np.concatenate([action[:2], [-1]])
-            # if np.random.rand() < sigma:
-            #     action[2] += np.random.rand()/2
-            # if np.random.rand() > 0.1:
-            #     action[2] = 0
-            # action_step = action.numpy()
-            # action_step[2] = 2*action_step[2] - 1
-            # if np.random.rand() < sigma:
-            #     action[2] *= -1
 
             next_state, reward, done, _ = env.step(action)
-            #next_state, reward, done, _ = env.step(action_new)
-            #print("Im here")
             agent.push(state, action, reward, next_state, done)
             episode_reward += reward
+            datalog["epsiode length"].append(i)
+            datalog["total reward"].append(episode_reward)
 
             if len(agent.buffer) > hyprm.batchsize:
                 # for params in agent.policynet.brake.parameters():
@@ -105,20 +92,13 @@ def train(device):
             if done:
                 break
             state = next_state
-        datalog["epsiode length"].append(i)
-        datalog["total reward"].append(episode_reward)
+            
         average_reward = torch.mean(torch.tensor(datalog["total reward"][-20:])).item()
         reward_list.append(average_reward)
         # with open("reward_list", "wb") as fp:
         #     pickle.dump(1, reward_list)
-        # with open("td_list", "wb") as tp:
-        #     pickle.dump(1, td_list)
-        #Load
-        '''
-        with open("reward_list", "rb) as fp:
-            list = pickle.load(fp)
-        '''
-        if eps%20 == 0:
+
+        if eps % 20 == 0:
             torch.save(agent.state_dict(), f"{FOLDER_NAME}/models/agent_{eps}_dict")
             torch.save(agent.opt_policy.state_dict(), f"{FOLDER_NAME}/models/agent_{eps}_policy_opt")
             torch.save(agent.opt_value.state_dict(), f"{FOLDER_NAME}/models/agent_{eps}_value_opt")
@@ -128,10 +108,11 @@ def train(device):
             torch.save(agent.state_dict(), f"{FOLDER_NAME}/best_agent_dict")
             torch.save(agent.opt_policy.state_dict(), f"{FOLDER_NAME}/best_agent_policy_opt")
             torch.save(agent.opt_value.state_dict(), f"{FOLDER_NAME}/best_agent_value_opt")
+        
         print("\r Processs percentage: {:2.1f}%, Average reward: {:2.3f}, Best reward: {:2.3f}".format(eps/hyprm.episodes*100, average_reward, best_reward), end="", flush=True)
         json.dump(datalog, open(f"{FOLDER_NAME}/plot_data.json", 'w'))
-    print("")
 
+    print("")
 
 
 if __name__ == "__main__":
