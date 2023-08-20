@@ -52,7 +52,7 @@ def train(device):
     agent.to(device)
 
     if cont:
-        agent.load_state_dict(torch.load('best_agent_dict'))
+        agent.load_state_dict(torch.load(f'{FOLDER_NAME}best_agent_dict'))
         # agent.opt_policy.load_state_dict(torch.load('best_agent_policy_opt'))
         # agent.opt_value.load_state_dict(torch.load('best_agent_value_opt'))
 
@@ -77,6 +77,8 @@ def train(device):
             next_state, reward, done, _ = env.step(action)
             agent.push(state, action, reward, next_state, done)
             episode_reward += reward
+            datalog["epsiode length"].append(i)
+            datalog["total reward"].append(episode_reward)
 
             if len(agent.buffer) > hyprm.batchsize:
                 # for params in agent.policynet.brake.parameters():
@@ -90,9 +92,7 @@ def train(device):
             if done:
                 break
             state = next_state
-        
-        datalog["epsiode length"].append(i)
-        datalog["total reward"].append(episode_reward)
+            
         average_reward = torch.mean(torch.tensor(datalog["total reward"][-20:])).item()
         reward_list.append(average_reward)
         # with open("reward_list", "wb") as fp:
