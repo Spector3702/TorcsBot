@@ -43,6 +43,7 @@ jobs:
         ./configure --x-libraries=/usr/lib/
         make
         sudo make install
+        make datainstall
 
     - name: Install Python dependencies
       run: |
