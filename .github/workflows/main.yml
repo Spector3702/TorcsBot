@@ -27,10 +27,17 @@ jobs:
         sudo apt-get install -y xvfb
         Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
 
-    - name: Set up PulseAudio
+    - name: Configure ALSA to use dummy driver
       run: |
-        sudo apt-get install -y pulseaudio
-        start-pulseaudio-x11
+        echo "pcm.dummy {" > ~/.asoundrc
+        echo "  type dummy" >> ~/.asoundrc
+        echo "  hint {" >> ~/.asoundrc
+        echo "    show on" >> ~/.asoundrc
+        echo "    description \"Dummy Playback\"" >> ~/.asoundrc
+        echo "  }" >> ~/.asoundrc
+        echo "}" >> ~/.asoundrc
+        echo "pcm.default pcm.dummy" >> ~/.asoundrc
+        echo "ctl.default pcm.dummy" >> ~/.asoundrc
       
     - name: Clone and configure gym_torcs
       run: |
