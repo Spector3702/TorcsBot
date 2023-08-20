@@ -29,10 +29,10 @@ jobs:
 
     - name: Configure ALSA to use null driver
       run: |
-        echo "pcm.!default {" > ~/.asoundrc
+        echo 'pcm.!default {' > ~/.asoundrc
         echo "  type null" >> ~/.asoundrc
         echo "}" >> ~/.asoundrc
-        echo "ctl.!default {" >> ~/.asoundrc
+        echo 'ctl.!default {' >> ~/.asoundrc
         echo "  type null" >> ~/.asoundrc
         echo "}" >> ~/.asoundrc
       
@@ -41,9 +41,6 @@ jobs:
         cd gym_torcs/vtorcs-RL-color/
         chmod +x ./configure
         ./configure --x-libraries=/usr/lib/
-        make
-        make install
-        make datainstall
 
     - name: Install Python dependencies
       run: |
