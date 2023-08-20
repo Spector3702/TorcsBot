@@ -50,5 +50,6 @@ jobs:
     
     - name: Set PYTHONPATH and run the script
       run: |
+        sudo chown -R root:root /usr/local/share/games/torcs
         export PYTHONPATH="${PYTHONPATH}:$(pwd)"
         python TORCS_DDPG/test.py --device cpu
