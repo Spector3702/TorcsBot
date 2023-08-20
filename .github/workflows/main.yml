@@ -27,6 +27,12 @@ jobs:
         sudo apt-get install -y xvfb
         Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
 
+    - name: Set up dummy sound driver
+      run: |
+        sudo modprobe snd-dummy
+        echo "pcm.!default { type hw; card Dummy; }" >> ~/.asoundrc
+        echo "ctl.!default { type hw; card Dummy; }" >> ~/.asoundrc
+
     - name: Clone and configure gym_torcs
       run: |
         git clone https://github.com/ugo-nama-kun/gym_torcs.git
