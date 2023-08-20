@@ -1,7 +1,6 @@
 import gym
 from gym import spaces
 import numpy as np
-import torcs_env.snakeoil3_gym as snakeoil3
 import numpy as np
 import copy
 import collections as col
@@ -9,6 +8,7 @@ import os
 import time
 import xml.etree.ElementTree as ET
 
+import torcs_env.snakeoil3_gym as snakeoil3
 from torcs_env.utils import sample_track
 from torcs_env.utils import set_render_mode
 

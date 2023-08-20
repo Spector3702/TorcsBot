@@ -18,7 +18,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y torcs libglib2.0-dev libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev libplib-dev libopenal-dev libalut-dev libxi-dev libxmu-dev libxrender-dev libxrandr-dev libpng-dev
+        sudo apt-get install -y torcs python3-pip libglib2.0-dev libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev libplib-dev libopenal-dev libalut-dev libxi-dev libxmu-dev libxrender-dev libxrandr-dev libpng-dev
         wget "http://nz.archive.ubuntu.com/ubuntu/pool/main/libx/libxxf86vm/libxxf86vm-dev_1.1.4-1build3_amd64.deb"
         sudo dpkg -i libxxf86vm-dev_1.1.4-1build3_amd64.deb
 
@@ -28,3 +28,12 @@ jobs:
         cd gym_torcs/vtorcs-RL-color/
         chmod +x ./configure
         ./configure --x-libraries=/usr/lib/
+
+    - name: Install Python dependencies
+      run: |
+        pip3 install numpy torch torchvision torchaudio gym
+  
+    - name: Set PYTHONPATH and run the script
+      run: |
+        export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+        python TORCS_DDPG/test.py
