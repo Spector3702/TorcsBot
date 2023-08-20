@@ -12,6 +12,7 @@ from torcs_env.gym_torcs import TorcsEnv
 import pickle
 import json
 import argparse
+import os
 
 FOLDER_NAME = "TORCS_DDPG"
 
@@ -104,6 +105,7 @@ def train(device, episodes):
         # with open("reward_list", "wb") as fp:
         #     pickle.dump(1, reward_list)
 
+        os.makedirs(f"{FOLDER_NAME}/models", exist_ok=True)
         if eps % 20 == 0:
             torch.save(agent.state_dict(), f"{FOLDER_NAME}/models/agent_{eps}_dict")
             torch.save(agent.opt_policy.state_dict(), f"{FOLDER_NAME}/models/agent_{eps}_policy_opt")
