@@ -42,6 +42,7 @@ jobs:
         chmod +x ./configure
         ./configure --x-libraries=/usr/lib/
         make
+        make install
 
     - name: Install Python dependencies
       run: |
