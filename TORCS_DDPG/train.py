@@ -11,11 +11,17 @@ from agent.random_process import OrnsteinUhlenbeckProcess
 from torcs_env.gym_torcs import TorcsEnv
 import pickle
 import json
-
+import argparse
 
 FOLDER_NAME = "TORCS_DDPG"
 
-def train(device):
+parser = argparse.ArgumentParser()
+parser.add_argument("--episodes", type=int, required=True, help="spceify how many episodes to train")
+parser.add_argument("--device", type=str, required=True, help="spceify which device to use.")
+args = parser.parse_args()
+
+
+def train(device, episodes):
     cont = False  # Dont forget to change start sigma
     train_all = True  # Set True if train all network, False if train only break part of the network(Dont forget to change clip_grad!)
     env = TorcsEnv(path="torcs_env/quickrace.xml")
@@ -26,7 +32,7 @@ def train(device):
                 "lrvalue": 0.001, #0.001
                 "lrpolicy": 0.0001, #0.0001
                 "gamma": 0.95,
-                "episodes": 100000,
+                "episodes": episodes,
                 "sigma_episode": 500,
                 "buffersize": 300000,
                 "tau": 0.001,
@@ -116,4 +122,6 @@ def train(device):
 
 
 if __name__ == "__main__":
-    train("cuda")
+    episodes = args.episodes
+    device = args.device
+    train(device, episodes)

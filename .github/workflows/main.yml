@@ -49,8 +49,9 @@ jobs:
       run: |
         pip3 install numpy torch torchvision torchaudio gym
     
-    - name: Set PYTHONPATH and run the script
+    - name: Set PYTHONPATH and test DDPG
       run: |
         sudo chown -R root:root /usr/local/share/games/torcs
         export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+        python TORCS_DDPG/train.py --device cpu --episodes 1
         python TORCS_DDPG/test.py --device cpu
