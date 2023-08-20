@@ -36,12 +36,14 @@ jobs:
         echo "  type null" >> ~/.asoundrc
         echo "}" >> ~/.asoundrc
       
-    - name: Clone and configure gym_torcs
+    - name: Configure gym_torcs
       run: |
-        git clone https://github.com/ugo-nama-kun/gym_torcs.git
         cd gym_torcs/vtorcs-RL-color/
         chmod +x ./configure
         ./configure --x-libraries=/usr/lib/
+        make
+        make install
+        make datainstall
 
     - name: Install Python dependencies
       run: |
