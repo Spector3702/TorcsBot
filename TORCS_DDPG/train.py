@@ -93,11 +93,8 @@ def train(device):
                 break
             state = next_state
 
-
         average_reward = torch.mean(torch.tensor(datalog["total reward"][-20:])).item()
         reward_list.append(average_reward)
-        # with open("reward_list", "wb") as fp:
-        #     pickle.dump(1, reward_list)
 
         if eps % 20 == 0:
             torch.save(agent.state_dict(), f"{FOLDER_NAME}/models/agent_{eps}_dict")
@@ -113,6 +110,8 @@ def train(device):
         print("\r Processs percentage: {:2.1f}%, Average reward: {:2.3f}, Best reward: {:2.3f}".format(eps/hyprm.episodes*100, average_reward, best_reward), end="", flush=True)
         json.dump(datalog, open(f"{FOLDER_NAME}/plot_data.json", 'w'))
 
+        with open(f'{FOLDER_NAME}/ddpg_rewards.pkl', 'wb') as output:
+            pickle.dump(reward_list, output, protocol=pickle.HIGHEST_PROTOCOL)
     print("")
 
 

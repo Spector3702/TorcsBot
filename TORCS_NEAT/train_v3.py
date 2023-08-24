@@ -1,86 +1,86 @@
 import neat
-import os
-import numpy as np
 from torcs_env.gym_torcs import TorcsEnv
-from multiprocessing import Pool, Manager, current_process
+import pickle
+import os
+import random
+import glob
 
+FOLDER_NAME = 'TORCS_NEAT'
 
-# Genome evaluation function
-def eval_genome(genome_id, genome, config, return_dict):
-    worker_number = current_process()._identity[0] - 1  # Get the worker number
-    genome.fitness = 0.0  # Initialize fitness to 0.0
+def evaluate_individual(genome, config, num_episodes):
+    env = TorcsEnv(path="torcs_env/quickrace.xml")
     net = neat.nn.FeedForwardNetwork.create(genome, config)
 
-    env = TorcsEnv(path="/usr/local/share/games/torcs/config/raceman/quickrace.xml")
-    ob = env.reset(relaunch=True, render=False, sampletrack=True)
+    max_time_steps = 1000
 
-    episode_reward = 0.0
+    for episode in range(num_episodes):
+        random_seed = episode
+        random.seed(random_seed)
+        state = env.reset(relaunch=True, render=False, sampletrack=True)
+        episode_reward = 0
+        
+        for _ in range(max_time_steps):
+            inputs = state
+            action = net.activate(inputs)
+            action = [float(a) for a in action]
 
-    for _ in range(1000):  # You may want to adjust this based on episode length
-        inputs = ob  # Assuming the observation is a 1D array
-        action = net.activate(inputs)
-        action = np.array(action)
-        ob, reward, done, _ = env.step(action)
+            next_state, reward, done, _ = env.step(action)
+            episode_reward += reward
 
-        episode_reward += reward
-        if done:
-            break
+            if done:
+                break
 
-    genome.fitness = episode_reward
-    return_dict[genome_id] = (worker_number, episode_reward)
+            state = next_state
 
+        print(f"Genome: {genome.key}, Episode: {episode + 1}, Current Reward: {episode_reward:.2f}")
 
-def train_neat():
-    # Load NEAT configuration from a config file
-    config_path = os.path.join(os.path.dirname(__file__), 'config_file.txt')
-    config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
+    return episode_reward
 
-    # Set up multiprocessing pool for parallel genome evaluation
-    num_workers = 2  # Change the number of workers to 2
-    pool = Pool(processes=num_workers)
-    manager = Manager()
-    return_dict = manager.dict()
+def train_neat(config_file, generations, num_episodes):
+    checkpoint_path = './TORCS_NEAT/checkpoints/neat-checkpoint-'
+    global last_gen
 
-    # Create the population
-    p = neat.Population(config)
+    # if run first time
+    if (len(glob.glob(checkpoint_path + '*')) == 0):
+        config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, config_file)#將config_file中的參數加入config這個variable中
+        population = neat.Population(config)
+        last_gen = 0
+        all_rewards = []
+    # if continue training
+    else:
+        gen_num = []
+        for file in glob.glob(checkpoint_path + '*'):
+            gen_num.append(int(file[len(checkpoint_path):]))
+        population = neat.Checkpointer.restore_checkpoint(checkpoint_path + str(max(gen_num)))
+        last_gen = population.generation
+        with open(f'{FOLDER_NAME}/neat_rewards.pkl', 'rb') as f:
+            all_rewards = pickle.load(f)
 
-    # Add a reporter to track progress
-    p.add_reporter(neat.StdOutReporter(True))
-    stats = neat.StatisticsReporter()
-    p.add_reporter(stats)
-
-    # Run the training for a specified number of generations
-    generations = 300
-    for gen in range(generations):
-        genomes = list(p.population.items())
-        jobs = []
-
+    def eval_genomes(genomes, config):
         for genome_id, genome in genomes:
-            job = pool.apply_async(eval_genome, (genome_id, genome, config, return_dict))
-            jobs.append(job)
+            reward_list = []
+            for _ in range(num_episodes):
+                reward = evaluate_individual(genome, config, num_episodes)
+                reward_list.append(reward)
 
-        for job in jobs:
-            job.get()
+            genome.fitness = max(reward_list)
+            all_rewards.append(reward_list)
+            
+            with open(f'{FOLDER_NAME}/neat_rewards.pkl', 'wb') as output:
+                pickle.dump(all_rewards, output, protocol=pickle.HIGHEST_PROTOCOL)
 
-        for genome_id, genome in genomes:
-            worker_number, genome_reward = return_dict[genome_id]
-            genome.fitness = genome_reward
+    
+    population.add_reporter(neat.StdOutReporter(True))
+    population.add_reporter(neat.StatisticsReporter())
+    population.add_reporter(neat.Checkpointer(1, filename_prefix = checkpoint_path)) # gen_interval = 1
 
-            # Output the worker number and reward for each genome
-            print(f"Generation {gen}, Worker {worker_number}, Genome {genome_id}, Reward: {genome_reward}")
+    winner = population.run(eval_genomes, n=generations)
 
-        # End of generation, call NEAT's logic
-        p.reporters.end_generation(p.population, p.species, p.generation)
-
-    # Display the best genome
-    winner = stats.best_genome()
-    print('\nBest genome:\n{!s}'.format(winner))
-
-    # Save the winner's network if needed
-    winner_net = neat.nn.FeedForwardNetwork.create(winner, config)
-    with open('winner_net.txt', 'w') as f:
-        f.write(str(winner_net))
-
+    with open('best_genome.pkl', 'wb') as output:
+        pickle.dump(winner, output, 1)
 
 if __name__ == '__main__':
-    train_neat()
+    generations = 100
+    num_episodes = 1
+    config_file = os.path.join(os.path.dirname(__file__), 'config_file.txt')
+    train_neat(config_file, generations = generations, num_episodes = num_episodes)

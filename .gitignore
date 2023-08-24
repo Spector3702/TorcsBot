@@ -5,4 +5,8 @@ plot_data.json
 __pycache__
 TORCS_DDPG/models/*
 test.ipynb
-brewards.pkl
+
+TORCS_NEAT/checkpoints/*
+neat_rewards.pkl
+best_genome.pkl
+ddpg_rewards.pkl
