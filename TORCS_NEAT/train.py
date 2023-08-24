@@ -1,8 +1,13 @@
 import neat
 import os
 import numpy as np
+import argparse
+
 from torcs_env.gym_torcs import TorcsEnv
-from collections import namedtuple
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--generations", type=int, required=True, help="spceify how many generations to train.")
+args = parser.parse_args()
 
 
 def eval_genomes(genomes, config):
@@ -10,7 +15,7 @@ def eval_genomes(genomes, config):
         genome.fitness = 4.0
         net = neat.nn.FeedForwardNetwork.create(genome, config)
 
-        env = TorcsEnv(path="/usr/local/share/games/torcs/config/raceman/quickrace.xml")
+        env = TorcsEnv(path="torcs_env/quickrace.xml")
         ob = env.reset(relaunch= True, render=False, sampletrack=True)
 
         for _ in range(1000):  # You may want to change this depending on the maximum length of an episode
@@ -24,7 +29,7 @@ def eval_genomes(genomes, config):
                 break
 
 
-def train():
+def train(generations):
     # Load configuration.
     config_path = os.path.join(os.path.dirname(__file__), 'config_file.txt')
     config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
@@ -33,7 +38,8 @@ def train():
     p = neat.Population(config)
 
     # Run for up to 300 generations.
-    winner = p.run(eval_genomes, 300)
+    winner = p.run(eval_genomes, 1)
 
 if __name__ == '__main__':
-    train()
+    generations = args.generations
+    train(generations)

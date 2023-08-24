@@ -55,3 +55,9 @@ jobs:
         export PYTHONPATH="${PYTHONPATH}:$(pwd)"
         python TORCS_DDPG/train.py --device cpu --episodes 1
         python TORCS_DDPG/test.py --device cpu
+
+    - name: Set PYTHONPATH and test NEAT
+      run: |
+        sudo chown -R root:root /usr/local/share/games/torcs
+        export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+        python TORCS_NEAT/train.py --generations 1
