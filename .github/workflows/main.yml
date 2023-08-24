@@ -47,7 +47,7 @@ jobs:
 
     - name: Install Python dependencies
       run: |
-        pip3 install numpy torch torchvision torchaudio gym
+        pip3 install numpy torch torchvision torchaudio gym neat-python
     
     - name: Set PYTHONPATH and test DDPG
       run: |
