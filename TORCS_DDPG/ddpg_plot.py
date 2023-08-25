@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 FOLDER_NAME = 'TORCS_DDPG'
 # Load rewards from the saved file
-with open(f'{FOLDER_NAME}/ddpg_rewards.pkl', 'rb') as f:
+with open(f'{FOLDER_NAME}/reward/ddpg_rewards.pkl', 'rb') as f:
     all_rewards = pickle.load(f)
 
 plt.plot(all_rewards, marker='o', color='orange')

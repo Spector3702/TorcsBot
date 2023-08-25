@@ -110,7 +110,7 @@ def train(device):
         print("\r Processs percentage: {:2.1f}%, Average reward: {:2.3f}, Best reward: {:2.3f}".format(eps/hyprm.episodes*100, average_reward, best_reward), end="", flush=True)
         json.dump(datalog, open(f"{FOLDER_NAME}/plot_data.json", 'w'))
 
-        with open(f'{FOLDER_NAME}/ddpg_rewards.pkl', 'wb') as output:
+        with open(f'{FOLDER_NAME}/reward/ddpg_rewards.pkl', 'wb') as output:
             pickle.dump(reward_list, output, protocol=pickle.HIGHEST_PROTOCOL)
     print("")
 

@@ -4,9 +4,10 @@ best_agent_value_opt
 plot_data.json
 __pycache__
 TORCS_DDPG/models/*
+TORCS_DDPG/reward/*
 test.ipynb
 
 TORCS_NEAT/checkpoints/*
-neat_rewards.pkl
+TORCS_NEAT/reward/*
 best_genome.pkl
-ddpg_rewards.pkl
+

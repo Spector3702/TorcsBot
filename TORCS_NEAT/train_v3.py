@@ -32,7 +32,7 @@ def evaluate_individual(genome, config, num_episodes):
 
             state = next_state
 
-        print(f"Genome: {genome.key}, Episode: {episode + 1}, Current Reward: {episode_reward:.2f}")
+        print(f"Genome: {genome.key}, Current Reward: {episode_reward:.2f}")
 
     return episode_reward
 
@@ -53,7 +53,7 @@ def train_neat(config_file, generations, num_episodes):
             gen_num.append(int(file[len(checkpoint_path):]))
         population = neat.Checkpointer.restore_checkpoint(checkpoint_path + str(max(gen_num)))
         last_gen = population.generation
-        with open(f'{FOLDER_NAME}/neat_rewards.pkl', 'rb') as f:
+        with open(f'{FOLDER_NAME}/reward/neat_rewards.pkl', 'rb') as f:
             all_rewards = pickle.load(f)
 
     def eval_genomes(genomes, config):
@@ -66,7 +66,7 @@ def train_neat(config_file, generations, num_episodes):
             genome.fitness = max(reward_list)
             all_rewards.append(reward_list)
             
-            with open(f'{FOLDER_NAME}/neat_rewards.pkl', 'wb') as output:
+            with open(f'{FOLDER_NAME}/reward/neat_rewards.pkl', 'wb') as output:
                 pickle.dump(all_rewards, output, protocol=pickle.HIGHEST_PROTOCOL)
 
     
