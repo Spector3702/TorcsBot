@@ -66,8 +66,8 @@ def train_neat(config_file, generations, num_episodes):
             genome.fitness = max(reward_list)
             all_rewards.append(reward_list)
             
-            with open(f'{FOLDER_NAME}/reward/neat_rewards.pkl', 'wb') as output:
-                pickle.dump(all_rewards, output, protocol=pickle.HIGHEST_PROTOCOL)
+        with open(f'{FOLDER_NAME}/reward/neat_rewards.pkl', 'wb') as output:
+            pickle.dump(all_rewards, output, protocol=pickle.HIGHEST_PROTOCOL)
 
     
     population.add_reporter(neat.StdOutReporter(True))
