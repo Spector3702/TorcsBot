@@ -9,6 +9,7 @@ FOLDER_NAME = 'TORCS_NEAT'
 with open(f'{FOLDER_NAME}/reward/neat_rewards.pkl', 'rb') as f:
     all_rewards = pickle.load(f)
 
+print(len(all_rewards))
 # Calculate the average reward for each group of 10 generations
 l = len(all_rewards) // 10
 avg = []
@@ -18,7 +19,7 @@ for i in range(l):
     total = sum(_ for _ in gen)
     avg.append(total / 10)
 
-plt.figure(figsize=(20, 10))  # Adjust figure size if needed
+plt.figure(figsize=(16, 8))  # Adjust figure size if needed
 plt.subplot(1, 2, 1)  # Subplot: 1 row, 2 columns, plot 1
 print(avg)
 # Plot the average rewards with generations as x-axis
