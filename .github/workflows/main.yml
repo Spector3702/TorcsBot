@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DISPLAY: :99
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y torcs python3-pip libglib2.0-dev libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev libplib-dev libopenal-dev libalut-dev libxi-dev libxmu-dev libxrender-dev libxrandr-dev libpng-dev xautomation
+        wget "http://nz.archive.ubuntu.com/ubuntu/pool/main/libx/libxxf86vm/libxxf86vm-dev_1.1.4-1build3_amd64.deb"
+        sudo dpkg -i libxxf86vm-dev_1.1.4-1build3_amd64.deb
+
+    - name: Setup xvfb
+      run: |
+        sudo apt-get install -y xvfb
+        Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+
+    - name: Configure ALSA to use null driver
+      run: |
+        echo 'pcm.!default {' > ~/.asoundrc
+        echo "  type null" >> ~/.asoundrc
+        echo "}" >> ~/.asoundrc
+        echo 'ctl.!default {' >> ~/.asoundrc
+        echo "  type null" >> ~/.asoundrc
+        echo "}" >> ~/.asoundrc
+      
+    - name: Configure gym_torcs
+      run: |
+        cd gym_torcs/vtorcs-RL-color/
+        chmod +x ./configure
+        ./configure --x-libraries=/usr/lib/
+        make
+        sudo make install
+        make datainstall
+
+    - name: Install Python dependencies
+      run: |
+        pip3 install numpy torch torchvision torchaudio gym neat-python
+    
+    - name: Set PYTHONPATH and test DDPG
+      run: |
+        sudo chown -R root:root /usr/local/share/games/torcs
+        export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+        python TORCS_DDPG/train.py --device cpu --episodes 1
+        python TORCS_DDPG/test.py --device cpu
+
+    - name: Set PYTHONPATH and test NEAT
+      run: |
+        sudo chown -R root:root /usr/local/share/games/torcs
+        export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+        python TORCS_NEAT/train.py --generations 1

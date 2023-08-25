@@ -1,9 +1,16 @@
 import neat
-from torcs_env.gym_torcs import TorcsEnv
 import pickle
 import os
 import random
 import glob
+import numpy as np
+import argparse
+
+from torcs_env.gym_torcs import TorcsEnv
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--generations", type=int, required=True, help="spceify how many generations to train.")
+args = parser.parse_args()
 
 FOLDER_NAME = 'TORCS_NEAT'
 
@@ -80,7 +87,7 @@ def train_neat(config_file, generations, num_episodes):
         pickle.dump(winner, output, 1)
 
 if __name__ == '__main__':
-    generations = 100
+    generations = args.generations
     num_episodes = 1
     config_file = os.path.join(os.path.dirname(__file__), 'config_file.txt')
     train_neat(config_file, generations = generations, num_episodes = num_episodes)

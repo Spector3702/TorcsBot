@@ -193,10 +193,9 @@ class Client():
             (opts, args) = getopt.getopt(sys.argv[1:], 'H:p:i:m:e:t:s:dhv',
                        ['host=','port=','id=','steps=',
                         'episodes=','track=','stage=',
-                        'debug','help','version'])
+                        'debug','help','version', 'device=', 'generations='])
         except getopt.error as why:
-            # print('getopt error: %s\n%s' % (why, usage))
-            sys.exit(-1)
+            print('getopt error: %s\n%s' % (why, usage))
         try:
             for opt in opts:
                 if opt[0] == '-h' or opt[0] == '--help':
