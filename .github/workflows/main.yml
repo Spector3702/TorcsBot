@@ -9,26 +9,38 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
-    container: 
-      image: spector3702/neat-parallel:latest
-      options: --privileged  # This is required for Docker-in-Docker capabilities
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: Prepare and test DDPG
-      run: |
-        Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-        python TORCS_DDPG/train.py --device cpu --episodes 1
-        python TORCS_DDPG/test.py --device cpu
+    - name: Login to DockerHub
+      uses: docker/login-action@v1 
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-    - name: Prepare and test NEAT
-      run: |
-        chmod +x TORCS_NEAT/CI_NEAT.sh
-        TORCS_NEAT/CI_NEAT.sh
+    - name: Pull Docker image
+      run: docker pull spector3702/neat-parallel:latest
 
-    - name: Run parallel NEAT
+    - name: Run and test DDPG within Docker container
       run: |
-        export HOST_PATH=$PWD
+        docker run --rm \
+        -v $PWD:/TorcsBot \
+        spector3702/neat-parallel:latest \
+        bash -c "chmod +x TORCS_DDPG/CI_DDPG.sh && TORCS_DDPG/CI_DDPG.sh"
+
+    - name: Run and test NEAT within Docker container
+      run: |
+        docker run --rm \
+        -v $PWD:/TorcsBot \
+        spector3702/neat-parallel:latest \
+        bash -c "chmod +x TORCS_NEAT/CI_NEAT.sh && TORCS_NEAT/CI_NEAT.sh"
+
+    - name: Run parallel NEAT within Docker container
+      run: |
+        docker run --rm \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        -v $PWD:/TorcsBot \
+        -e HOST_PATH=$PWD \
+        spector3702/neat-parallel:latest \
         python TORCS_NEAT/train_parallel.py --generations 1
