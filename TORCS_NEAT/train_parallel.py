@@ -2,8 +2,16 @@ import os
 import neat
 import time
 import pickle
+import threading
+import argparse
+
+from TORCS_NEAT.utils import load_config
 
 FOLDER_NAME = 'TORCS_NEAT'
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--generations", type=int, required=True, help="spceify how many generations to train.")
+args = parser.parse_args()
 
 
 def saving_genome(genome_id, genome):
@@ -23,43 +31,55 @@ def saving_genome(genome_id, genome):
 
 def retrieve_fitness(genome_id):
     file_name = f"{FOLDER_NAME}/fitnesses/fitness_{genome_id}.txt"
+
+    while not os.path.exists(file_name):
+        time.sleep(1)  
+    
     with open(file_name, 'r') as file:
         fitness = float(file.read().strip())
+
     return fitness
 
 
-# Define a function to train a single genome in a Docker container
-def train_genome_in_docker(genome_id, genome):
+def run_docker_container(genome_id, genome):
     genome_file = saving_genome(genome_id, genome)
     
     # Mount the directory to ensure both genome and fitness files are accessible
-    cmd = f'docker run --rm -v {os.getcwd()}:/TorcsBot neat-parallel:latest /bin/bash -c "Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 & python TORCS_NEAT/train_each_genome.py --genome {genome_file}"'
+    cmd = f'docker run --rm -v {os.getcwd()}:/TorcsBot spector3702/neat-parallel:latest /bin/bash -c "Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 & python TORCS_NEAT/train_each_genome.py --genome {genome_file}"'
     os.system(cmd)
     
     fitness = retrieve_fitness(genome_id)
+    genome.fitness = fitness
+
+
+def train_genome_in_docker(genomes, config):
+    threads = [] 
+
+    for genome_id, genome in genomes:
+        t = threading.Thread(target=run_docker_container, args=(genome_id, genome))
+        t.start()
+        threads.append(t)
+
+    # Wait for all threads to finish
+    for t in threads:
+        t.join()
     
-    return fitness
 
-
-def main():
-    config_path = os.path.join(os.path.dirname(__file__), 'config_file.txt')
-    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
-                        neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                        config_path) 
+def main(generations):
+    config = load_config('config_file.txt') 
     pop = neat.Population(config)
 
-    genomes = [(i, g) for i, g in enumerate(pop.population.values())]
+    # Add a statistics reporter to gather and print information about the evolution
+    stats = neat.StatisticsReporter()
+    pop.add_reporter(stats)
+    pop.add_reporter(neat.StdOutReporter(True))
 
-    fitnesses = []
-    for genome_id, genome in genomes:
-        # For simplicity, we're running them sequentially here. In practice, you'd want to run them in parallel and monitor their progress.
-        fitness = train_genome_in_docker(genome_id, genome)
-        genome.fitness = fitness
-        fitnesses.append(fitness)
-        time.sleep(2)  # Optional: To ensure that containers don't start at the exact same time
+    winner = pop.run(train_genome_in_docker, generations)
 
-    # Rest of the NEAT training loop (e.g., selecting the best genomes, breeding, etc.)
+    # Print the details of the best genome
+    print('\nBest genome:\n{!s}'.format(winner))
 
 
 if __name__ == '__main__':
-    main()
+    generations = args.generations
+    main(generations)
