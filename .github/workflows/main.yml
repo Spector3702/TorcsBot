@@ -19,8 +19,9 @@ jobs:
 
     - name: Prepare and test DDPG
       run: |
-        chmod +x TORCS_DDPG/CI_DDPG.sh
-        TORCS_DDPG/CI_DDPG.sh
+        Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+        python TORCS_DDPG/train.py --device cpu --episodes 1
+        python TORCS_DDPG/test.py --device cpu
 
     - name: Prepare and test NEAT
       run: |
