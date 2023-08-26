@@ -2,21 +2,27 @@
 
 ## Set Python path
 * Linux or MACOS
-    ```shell=
+    ```sh=
     export PYTHONPATH="${PYTHONPATH}:$(pwd)"
     ```
 
 ## Run DDPG
 * Train
-    ```python=
+    ```sh=
     python TORCS_DDPG/train.py --device <cpu_or_cuda> --episodes <number>
     ```
 
 ## Run NEAT
-* Train
-    ```python=
+* Train Serially
+    ```sh=
     python TORCS_NEAT/train.py --generations <number>
     ```
+* Train Parallely
+    ```sh=
+     python TORCS_NEAT/train_parallel.py --generations <number>
+    ```
+    * Prerequisite:
+        * [Docker](https://www.docker.com/) (Download for Windows, and it will automatically connect to WSL2)
 
 # Dev Workflow
 Never develop directly on main branch !!
