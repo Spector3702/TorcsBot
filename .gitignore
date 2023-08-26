@@ -5,3 +5,5 @@ plot_data.json
 __pycache__
 TORCS_DDPG/models/*
 test.ipynb
+*.pkl
+*.txt
