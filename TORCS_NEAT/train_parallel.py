@@ -44,8 +44,13 @@ def retrieve_fitness(genome_id):
 def run_docker_container(genome_id, genome):
     genome_file = saving_genome(genome_id, genome)
     
+    if os.path.exists('/.dockerenv'):
+        host_path = os.environ['HOST_PATH']
+    else:
+        host_path = os.getcwd()
+    
     # Mount the directory to ensure both genome and fitness files are accessible
-    cmd = f'docker run --rm -v {os.getcwd()}:/TorcsBot spector3702/neat-parallel:latest /bin/bash -c "Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 & python TORCS_NEAT/train_each_genome.py --genome {genome_file}"'
+    cmd = f'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v {host_path}:/TorcsBot spector3702/neat-parallel:latest /bin/bash -c "Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 & python TORCS_NEAT/train_each_genome.py --genome {genome_file}"'
     os.system(cmd)
     
     fitness = retrieve_fitness(genome_id)

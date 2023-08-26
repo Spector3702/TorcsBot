@@ -24,8 +24,23 @@ jobs:
 
     - name: Run and test DDPG within Docker container
       run: |
-        docker run --rm -v $PWD:/TorcsBot spector3702/neat-parallel:latest bash -c "chmod +x TORCS_NEAT/bashes/* && TORCS_NEAT/bashes/CI_DDPG.sh"
+        docker run --rm \
+        -v $PWD:/TorcsBot \
+        spector3702/neat-parallel:latest \
+        bash -c "chmod +x TORCS_DDPG/CI_DDPG.sh && TORCS_DDPG/CI_DDPG.sh"
 
     - name: Run and test NEAT within Docker container
       run: |
-        docker run --rm -v $PWD:/TorcsBot spector3702/neat-parallel:latest bash -c "chmod +x TORCS_NEAT/bashes/* && TORCS_NEAT/bashes/CI_NEAT.sh"
+        docker run --rm \
+        -v $PWD:/TorcsBot \
+        spector3702/neat-parallel:latest \
+        bash -c "chmod +x TORCS_NEAT/CI_NEAT.sh && TORCS_NEAT/CI_NEAT.sh"
+
+    - name: Run parallel NEAT within Docker container
+      run: |
+        docker run --rm \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        -v $PWD:/TorcsBot \
+        -e HOST_PATH=$PWD \
+        spector3702/neat-parallel:latest \
+        python TORCS_NEAT/train_parallel.py --generations 1
