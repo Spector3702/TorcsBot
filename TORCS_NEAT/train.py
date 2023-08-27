@@ -44,11 +44,8 @@ def train_neat(config_file, generations):
     checkpoint_path = f'./{FOLDER_NAME}/checkpoints/'
     reward_path = f'./{FOLDER_NAME}/reward/'
     # Create the folder if it doesn't exist
-    if not os.path.exists(checkpoint_path):
-        os.makedirs(checkpoint_path)  
-    if not os.path.exists(reward_path):
-        os.makedirs(reward_path)
-
+    os.makedirs(checkpoint_path, exist_ok=True)
+    os.makedirs(reward_path, exist_ok=True) 
     checkpoint_file_prefix = 'neat-checkpoint-'
     global last_gen
 
