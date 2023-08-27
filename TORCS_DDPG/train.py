@@ -20,13 +20,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--episodes", type=int, required=True, help="spceify how many episodes to train")
 parser.add_argument("--device", type=str, required=True, help="spceify which device to use.")
 args = parser.parse_args()
-models_path = f'./{FOLDER_NAME}/models/'
-reward_path = f'./{FOLDER_NAME}/reward/'
-# Create the folder if it doesn't exist
-if not os.path.exists(models_path):
-    os.makedirs(models_path)  
-if not os.path.exists(reward_path):
-    os.makedirs(reward_path)
 
 def train(device, episodes):
     cont = False  # Dont forget to change start sigma
@@ -123,6 +116,8 @@ def train(device, episodes):
         
         print("\r Processs percentage: {:2.1f}%, Average reward: {:2.3f}, Best reward: {:2.3f}".format(eps/hyprm.episodes*100, average_reward, best_reward), end="", flush=True)
         json.dump(datalog, open(f"{FOLDER_NAME}/plot_data.json", 'w'))
+
+        os.makedirs(f"{FOLDER_NAME}/reward", exist_ok=True)
 
         with open(f'{FOLDER_NAME}/reward/ddpg_rewards.pkl', 'wb') as output:
             pickle.dump(reward_list, output, protocol=pickle.HIGHEST_PROTOCOL)
