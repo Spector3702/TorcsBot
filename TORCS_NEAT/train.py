@@ -1,11 +1,14 @@
 import neat
+<<<<<<< .merge_file_a08788
 import pickle
 import os
 import random
 import glob
+=======
+>>>>>>> .merge_file_a04004
 import argparse
 
-from torcs_env.gym_torcs import TorcsEnv
+from TORCS_NEAT.utils import eval_genome, load_config
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--generations", type=int, required=True, help="spceify how many generations to train.")
@@ -13,6 +16,7 @@ args = parser.parse_args()
 
 FOLDER_NAME = 'TORCS_NEAT'
 
+<<<<<<< .merge_file_a08788
 def evaluate_individual(genome, config, num_episodes):
     env = TorcsEnv(path="torcs_env/quickrace.xml")
     net = neat.nn.FeedForwardNetwork.create(genome, config)
@@ -35,6 +39,11 @@ def evaluate_individual(genome, config, num_episodes):
 
             if done:
                 break
+=======
+def eval_genomes(genomes, config):
+    for _, genome in genomes:
+        eval_genome(genome, config)
+>>>>>>> .merge_file_a04004
 
             state = next_state
 
@@ -81,6 +90,7 @@ def train_neat(config_file, generations, num_episodes):
             with open(f'{FOLDER_NAME}/reward/neat_rewards.pkl', 'wb') as output:
                 pickle.dump(all_rewards, output, protocol=pickle.HIGHEST_PROTOCOL)
 
+<<<<<<< .merge_file_a08788
     population.add_reporter(neat.StdOutReporter(True))
     population.add_reporter(neat.StatisticsReporter())
     population.add_reporter(neat.Checkpointer(1, filename_prefix=checkpoint_path + checkpoint_file_prefix)) # gen_interval = 1
@@ -89,6 +99,14 @@ def train_neat(config_file, generations, num_episodes):
 
     with open('best_genome.pkl', 'wb') as output:
         pickle.dump(winner, output, 1)
+=======
+def train(generations):
+    config = load_config('config_file.txt')
+    p = neat.Population(config)
+
+    # Run for up to 300 generations.
+    winner = p.run(eval_genomes, generations)
+>>>>>>> .merge_file_a04004
 
 if __name__ == '__main__':
     generations = args.generations
