@@ -20,7 +20,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--episodes", type=int, required=True, help="spceify how many episodes to train")
 parser.add_argument("--device", type=str, required=True, help="spceify which device to use.")
 args = parser.parse_args()
-
+models_path = f'./{FOLDER_NAME}/models/'
+reward_path = f'./{FOLDER_NAME}/reward/'
+# Create the folder if it doesn't exist
+if not os.path.exists(models_path):
+    os.makedirs(models_path)  
+if not os.path.exists(reward_path):
+    os.makedirs(reward_path)
 
 def train(device, episodes):
     cont = False  # Dont forget to change start sigma
