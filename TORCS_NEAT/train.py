@@ -14,36 +14,33 @@ args = parser.parse_args()
 
 FOLDER_NAME = 'TORCS_NEAT'
 
-def evaluate_individual(genome, config, num_episodes):
+def evaluate_individual(genome, config):
     env = TorcsEnv(path="torcs_env/quickrace.xml")
     net = neat.nn.FeedForwardNetwork.create(genome, config)
 
     max_time_steps = 1000
 
-    for episode in range(num_episodes):
-        random_seed = episode
-        random.seed(random_seed)
-        state = env.reset(relaunch=True, render=False, sampletrack=True)
-        episode_reward = 0
+    state = env.reset(relaunch=True, render=False, sampletrack=True)
+    episode_reward = 0
         
-        for _ in range(max_time_steps):
-            inputs = state
-            action = net.activate(inputs)
-            action = [float(a) for a in action]
+    for _ in range(max_time_steps):
+        inputs = state
+        action = net.activate(inputs)
+        action = [float(a) for a in action]
 
-            next_state, reward, done, _ = env.step(action)
-            episode_reward += reward
+        next_state, reward, done, _ = env.step(action)
+        episode_reward += reward
 
-            if done:
-                break
+        if done:
+            break
 
-            state = next_state
+        state = next_state
 
-        print(f"Genome: {genome.key}, Current Reward: {episode_reward:.2f}")
+    print(f"Genome: {genome.key}, Current Reward: {episode_reward:.2f}")
 
     return episode_reward
 
-def train_neat(config_file, generations, num_episodes):
+def train_neat(config_file, generations):
     checkpoint_path = f'./{FOLDER_NAME}/checkpoints/'
     reward_path = f'./{FOLDER_NAME}/reward/'
     # Create the folder if it doesn't exist
@@ -66,15 +63,15 @@ def train_neat(config_file, generations, num_episodes):
             gen_num.append(int(file[len(checkpoint_path + checkpoint_file_prefix):]))
         population = neat.Checkpointer.restore_checkpoint(os.path.join(checkpoint_path, checkpoint_file_prefix + str(max(gen_num))))
         last_gen = population.generation
-        with open(os.path.join(FOLDER_NAME, 'reward', 'neat_rewards.pkl'), 'rb') as f:
+        with open(os.path.join(reward_path, 'neat_rewards.pkl'), 'rb') as f:
             all_rewards = pickle.load(f)
 
     def eval_genomes(genomes, config):
         for genome_id, genome in genomes:
             reward_list = []
-            for _ in range(num_episodes):
-                reward = evaluate_individual(genome, config, num_episodes)
-                reward_list.append(reward)
+            
+            reward = evaluate_individual(genome, config)
+            reward_list.append(reward)
 
             genome.fitness = max(reward_list)
             all_rewards.append(reward_list)
@@ -90,15 +87,8 @@ def train_neat(config_file, generations, num_episodes):
 
     with open('best_genome.pkl', 'wb') as output:
         pickle.dump(winner, output, 1)
-def train(generations):
-    config = load_config('config_file.txt')
-    p = neat.Population(config)
-
-    # Run for up to 300 generations.
-    winner = p.run(eval_genomes, generations)
 
 if __name__ == '__main__':
     generations = args.generations
-    num_episodes = 1
     config_file = os.path.join(os.path.dirname(__file__), 'config_file.txt')
-    train_neat(config_file, generations = generations, num_episodes = num_episodes)
+    train_neat(config_file, generations = generations)
