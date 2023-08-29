@@ -5,7 +5,7 @@ import pickle
 import threading
 import argparse
 
-from TORCS_NEAT.utils import load_config
+from TORCS_NEAT.utils import compute_population
 
 FOLDER_NAME = 'TORCS_NEAT'
 
@@ -71,18 +71,14 @@ def train_genome_in_docker(genomes, config):
     
 
 def main(generations):
-    config = load_config('config_file.txt') 
-    pop = neat.Population(config)
+    checkpoint_path = f'./{FOLDER_NAME}/checkpoints/'
+    checkpoint_file_prefix='neat-checkpoint-'
 
-    # Add a statistics reporter to gather and print information about the evolution
-    stats = neat.StatisticsReporter()
-    pop.add_reporter(stats)
-    pop.add_reporter(neat.StdOutReporter(True))
+    population = compute_population(1, checkpoint_path, checkpoint_file_prefix)
+    winner = population.run(train_genome_in_docker, generations)
 
-    winner = pop.run(train_genome_in_docker, generations)
-
-    # Print the details of the best genome
-    print('\nBest genome:\n{!s}'.format(winner))
+    with open(f'{FOLDER_NAME}/best_genome.pkl', 'wb') as output:
+        pickle.dump(winner, output, 1)
 
 
 if __name__ == '__main__':
