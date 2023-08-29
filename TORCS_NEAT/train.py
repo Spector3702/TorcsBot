@@ -15,10 +15,10 @@ def eval_genomes(genomes, config):
     fitness_path = f'./{FOLDER_NAME}/fitnesses'
     os.makedirs(fitness_path, exist_ok=True)
 
-    for genome_id, genome in genomes:
+    for idx, (_, genome) in enumerate(genomes):
         eval_genome(genome, config)
 
-        with open(f'{fitness_path}/genome_{genome_id}_fitness.txt', 'a') as file:
+        with open(f'{fitness_path}/genome_{idx}_fitness.txt', 'a') as file:
             file.write(str(genome.fitness) + '\n')
 
 

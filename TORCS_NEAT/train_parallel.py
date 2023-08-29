@@ -41,7 +41,6 @@ def retrieve_fitness(genome_id):
 
     while len(lines) != (GEN + 1):
         time.sleep(1)
-        print(f'wait for writing fitness, current lines: {len(lines)}')
         with open(file_name, 'r') as file:
             lines = file.readlines()
 
@@ -68,8 +67,8 @@ def train_genome_in_docker(genomes, config):
     global GEN
     threads = [] 
 
-    for genome_id, genome in genomes:
-        t = threading.Thread(target=run_docker_container, args=(genome_id, genome))
+    for idx, (_, genome) in enumerate(genomes):
+        t = threading.Thread(target=run_docker_container, args=(idx, genome))
         t.start()
         threads.append(t)
 
