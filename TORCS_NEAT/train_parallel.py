@@ -57,10 +57,17 @@ def run_docker_container(genome_id, genome):
     
     # Mount the directory to ensure both genome and fitness files are accessible
     cmd = f'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v {host_path}:/TorcsBot spector3702/neat-parallel:latest /bin/bash -c "Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 & python TORCS_NEAT/train_each_genome.py --genome {genome_file}"'
-    os.system(cmd)
+    result = os.system(cmd)
     
-    fitness = retrieve_fitness(genome_id)
-    genome.fitness = fitness
+    if result != 0:
+        fitness_file_path = f"{FOLDER_NAME}/fitnesses/genome_{genome_id}_fitness.txt"
+        genome.fitness = 0.0
+        with open(fitness_file_path, 'a') as file:
+            file.write(str(genome.fitness) + '\n')
+
+    else:
+        fitness = retrieve_fitness(genome_id)
+        genome.fitness = fitness
 
 
 def train_genome_in_docker(genomes, config):
