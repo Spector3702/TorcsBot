@@ -14,14 +14,14 @@ FOLDER_NAME = 'TORCS_NEAT'
 
 
 def eval_genomes(genomes, config):
-    reward_path = f'./{FOLDER_NAME}/reward/'
-    os.makedirs(reward_path, exist_ok=True)
+    fitness_path = f'./{FOLDER_NAME}/fitnesses'
+    os.makedirs(fitness_path, exist_ok=True)
 
     for genome_id, genome in genomes:
         eval_genome(genome, config)
 
-        with open(f'{FOLDER_NAME}/reward/neat_rewards.txt', 'a') as output:
-            output.write(str(genome.fitness) + '\n')
+        with open(f'{fitness_path}/genome_{genome_id}_fitness.txt', 'a') as file:
+            file.write(str(genome.fitness) + '\n')
 
 
 def train_neat(generations):

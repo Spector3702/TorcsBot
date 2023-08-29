@@ -36,7 +36,6 @@ def load_config(filename):
 
 def compute_population(interval, checkpoint_path, checkpoint_file_prefix):
     os.makedirs(checkpoint_path, exist_ok=True)
-    
     if len(glob.glob(os.path.join(checkpoint_path, checkpoint_file_prefix + '*'))) == 0:
         config = load_config('config_file.txt')
         population = neat.Population(config)
