@@ -8,6 +8,7 @@ import argparse
 from TORCS_NEAT.utils import compute_population
 
 FOLDER_NAME = 'TORCS_NEAT'
+GEN = 0
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--generations", type=int, required=True, help="spceify how many generations to train.")
@@ -30,15 +31,21 @@ def saving_genome(genome_id, genome):
 
 
 def retrieve_fitness(genome_id):
-    file_name = f"{FOLDER_NAME}/fitnesses/fitness_{genome_id}.txt"
+    file_name = f"{FOLDER_NAME}/fitnesses/genome_{genome_id}_fitness.txt"
 
     while not os.path.exists(file_name):
-        time.sleep(1)  
-    
-    with open(file_name, 'r') as file:
-        fitness = float(file.read().strip())
+        time.sleep(1)
 
-    return fitness
+    with open(file_name, 'r') as file:
+        lines = file.readlines()
+
+    while len(lines) != (GEN + 1):
+        time.sleep(1)
+        print(f'wait for writing fitness, current lines: {len(lines)}')
+        with open(file_name, 'r') as file:
+            lines = file.readlines()
+
+    return float(lines[-1].strip())
 
 
 def run_docker_container(genome_id, genome):
@@ -58,6 +65,7 @@ def run_docker_container(genome_id, genome):
 
 
 def train_genome_in_docker(genomes, config):
+    global GEN
     threads = [] 
 
     for genome_id, genome in genomes:
@@ -68,13 +76,18 @@ def train_genome_in_docker(genomes, config):
     # Wait for all threads to finish
     for t in threads:
         t.join()
+
+    GEN += 1
     
 
 def main(generations):
+    global GEN
     checkpoint_path = f'./{FOLDER_NAME}/checkpoints/'
     checkpoint_file_prefix='neat-checkpoint-'
 
-    population = compute_population(1, checkpoint_path, checkpoint_file_prefix)
+    population, generation = compute_population(1, checkpoint_path, checkpoint_file_prefix)
+    GEN = generation
+
     winner = population.run(train_genome_in_docker, generations)
 
     with open(f'{FOLDER_NAME}/best_genome.pkl', 'wb') as output:

@@ -1,10 +1,8 @@
-import neat
 import pickle
 import os
-import glob
 import argparse
 
-from TORCS_NEAT.utils import eval_genome, load_config, compute_population
+from TORCS_NEAT.utils import eval_genome, compute_population
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--generations", type=int, required=True, help="spceify how many generations to train.")
@@ -28,7 +26,7 @@ def train_neat(generations):
     checkpoint_path = f'./{FOLDER_NAME}/checkpoints/'
     checkpoint_file_prefix='neat-checkpoint-'
 
-    population = compute_population(1, checkpoint_path, checkpoint_file_prefix)
+    population, _ = compute_population(1, checkpoint_path, checkpoint_file_prefix)
     winner = population.run(eval_genomes, n=generations)
 
     with open(f'{FOLDER_NAME}/best_genome.pkl', 'wb') as output:

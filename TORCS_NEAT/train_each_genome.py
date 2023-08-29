@@ -24,9 +24,10 @@ def load_genome(file_name):
 def eval_genomes_and_save_fitness(genome_id, genome, config):
     eval_genome(genome, config)
 
-    os.makedirs(f'{FOLDER_NAME}/fitnesses', exist_ok=True)
-    with open(f"{FOLDER_NAME}/fitnesses/fitness_{genome_id}.txt", 'w') as file:
-        file.write(str(genome.fitness))
+    fitness_path = f'./{FOLDER_NAME}/fitnesses'
+    os.makedirs(fitness_path, exist_ok=True)
+    with open(f'{fitness_path}/genome_{genome_id}_fitness.txt', 'a') as file:
+        file.write(str(genome.fitness) + '\n')
 
 
 def train(genome_file):
