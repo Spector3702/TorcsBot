@@ -1,11 +1,12 @@
 import neat
 import os
 import glob
+import time
 
 from torcs_env.gym_torcs import TorcsEnv
 
 FOLDER_NAME = 'TORCS_NEAT'
-
+start_time = time.time()
 
 def eval_genome(genome, config, max_time_steps=1000):
     env = TorcsEnv(path="torcs_env/quickrace.xml")
@@ -21,9 +22,10 @@ def eval_genome(genome, config, max_time_steps=1000):
 
         next_state, reward, done, _ = env.step(action)
         genome.fitness += reward
-        # print(f'Adding reward: {reward} for genome {genome.key}')
-
-        if done or genome.fitness < -200:
+        
+        elapsed_time = time.time() - start_time
+        if done or genome.fitness < -200 or elapsed_time > 300:
+            print(f"Taining is stopped due to DONE, fitness or time limit reached. Current fitness: {genome.fitness}")
             break
 
         state = next_state
