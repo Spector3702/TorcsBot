@@ -6,28 +6,54 @@ import time
 from torcs_env.gym_torcs import TorcsEnv
 
 FOLDER_NAME = 'TORCS_NEAT'
-start_time = time.time()
+
+
+def detect_stop_condition(genome, elapsed_time, step_counter, previous_fitness):
+    if genome.fitness < -200:
+        print(f"Shutdown training since fitness gets too low: {genome.fitness}")
+        return True, step_counter, previous_fitness
+    elif elapsed_time > 300:
+        print("Shutdown training since time limit reached.")
+        return True, step_counter, previous_fitness
+    
+    # Check every 20 steps
+    if step_counter >= 20:
+        if (genome.fitness - previous_fitness) < 10:
+            print("Shutdown training since fitness did not improve above 10 in 20 steps.")
+            return True, step_counter, previous_fitness
+        
+        # Reset the step counter and update the previous fitness
+        step_counter = 0
+        previous_fitness = genome.fitness
+    
+    return False, step_counter, previous_fitness
+
 
 def eval_genome(genome, config, max_time_steps=1000):
     env = TorcsEnv(path="torcs_env/quickrace.xml")
     net = neat.nn.FeedForwardNetwork.create(genome, config)
-
     state = env.reset(relaunch=True, render=False, sampletrack=True)
+
     genome.fitness = 0.0
+    start_time = time.time()
+    previous_fitness = genome.fitness
+    step_counter = 0
         
     for _ in range(max_time_steps):
         inputs = state
         action = net.activate(inputs)
         action = [float(a) for a in action]
 
-        next_state, reward, done, _ = env.step(action)
+        next_state, reward, _, _ = env.step(action)
         genome.fitness += reward
         
         elapsed_time = time.time() - start_time
-        if done or genome.fitness < -200 or elapsed_time > 300:
-            print(f"Taining is stopped due to DONE, fitness or time limit reached. Current fitness: {genome.fitness}")
+        
+        stop, step_counter, previous_fitness = detect_stop_condition(genome, elapsed_time, step_counter, previous_fitness)
+        if stop:
             break
-
+        
+        step_counter += 1
         state = next_state
 
     print(f"Genome: {genome.key}, Current Reward: {genome.fitness:.2f}")
