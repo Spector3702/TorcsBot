@@ -250,7 +250,7 @@ class TorcsEnv:
         time.sleep(0.5)
         os.system('torcs -nofuel -nodamage -nolaptime -p 3101 &')
         time.sleep(0.5)
-        os.system('sh torcs_env/autostart.sh')
+        os.system('bash torcs_env/autostart.sh')
         time.sleep(0.5)
 
     def agent_to_torcs(self, u):
