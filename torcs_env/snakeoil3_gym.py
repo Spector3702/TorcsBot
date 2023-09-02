@@ -179,7 +179,7 @@ class Client():
                         os.system('torcs -nofuel -nodamage -nolaptime -vision &')
 
                     time.sleep(1.0)
-                    os.system('sh torcs_env/autostart.sh')
+                    os.system('bash torcs_env/autostart.sh')
                     n_fail = 5
                 n_fail -= 1
 

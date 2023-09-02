@@ -1,89 +1,53 @@
-import pickle
 import matplotlib.pyplot as plt
-from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import PolynomialFeatures
-import numpy as np
+import os
 
 FOLDER_NAME = 'TORCS_NEAT'
-# Load rewards from the saved file
-with open(f'{FOLDER_NAME}/reward/neat_rewards.pkl', 'rb') as f:
-    all_rewards = pickle.load(f)
 
-print(len(all_rewards))
-# Calculate the average reward for each group of 10 generations
-l = len(all_rewards) // 10
-avg = []
-all_rewards_alt = [item for sublist in all_rewards for item in sublist]
-for i in range(l):
-    gen = all_rewards_alt[i * 10: (i + 1) * 10]
-    total = sum(_ for _ in gen)
-    avg.append(total / 10)
 
-plt.figure(figsize=(16, 8))  # Adjust figure size if needed
-plt.subplot(1, 2, 1)  # Subplot: 1 row, 2 columns, plot 1
-print(avg)
-# Plot the average rewards with generations as x-axis
-plt.plot(avg, marker='o')
-plt.xlabel('Generations')
-plt.ylabel('Average Reward')
-plt.title('Average Reward per Generation')
-# Set integer ticks for x-axis
-x_ticks = list(range(0, len(avg) * 1, 5))
-plt.xticks(x_ticks, x_ticks)
-plt.grid(True)
+def read_fitness_from_file(filename):
+    with open(filename, 'r') as file:
+        return [float(line.strip()) for line in file.readlines()]
 
-plt.subplot(1, 2, 2)  # Subplot: 1 row, 2 columns, plot 2
-# ------------------------------------------------------------------------- func. switchiing part
-# Convert the x-axis values to an array of integers (0, 1, 2, ...)
-x = np.arange(len(all_rewards_alt)).reshape(-1, 1)
-# Fit a linear regression model
-model = LinearRegression() # Linear
-model.fit(x, all_rewards_alt)
-y_pred = model.predict(x)
 
-# Create the scatter plot
-plt.scatter(x, all_rewards_alt, marker='.', color='orange', label='Data points')
-plt.plot(x, y_pred, color='#6688FF', linestyle='dashed', label='Trendline')
-# -------------------------------------------------------------------------
-plt.xlabel('Genomes')
-plt.ylabel('Reward')
-plt.title('Reward per Genome')
+def plot_average_fitness_per_generation(all_fitnesses, pop_size=2):
+    # Calculate the average fitness for each generation across all genomes
+    average_fitnesses = [sum(fitness) / len(fitness) for fitness in zip(*all_fitnesses)]
+    
+    plt.figure(figsize=(10,6))
+    plt.plot(average_fitnesses, marker='o', linestyle='-')
+    plt.xlabel('Generations')
+    plt.ylabel('Average Fitness')
+    plt.title('Average Fitness per Generation')
+    plt.grid(True)
+    plt.show()
 
-plt.legend()
-plt.show()
+def plot_fitness_per_genome(all_fitnesses):
+    # Plotting each genome's fitness evolution across generations
+    plt.figure(figsize=(10,6))
+    for fitness in all_fitnesses:
+        plt.plot(fitness, marker='o', linestyle='-')
+    plt.xlabel('Generations')
+    plt.ylabel('Fitness')
+    plt.title('Fitness per Genome')
+    plt.grid(True)
+    plt.show()
 
-"""
-Different Types of Trendline : 
---------------------------------------------------------------------------------
-linear
---------------------------------------------------------------------------------
-# Convert the x-axis values to an array of integers (0, 1, 2, ...)
-x = np.arange(len(all_rewards_alt)).reshape(-1, 1)
-# Fit a linear regression model
-model = LinearRegression() # Linear
-model.fit(x, all_rewards_alt)
-y_pred = model.predict(x)
+def main():
+    # Assuming all genome fitness files are in the FOLDER_NAME directory
+    fitness_path = f'{FOLDER_NAME}/fitnesses'
+    fitness_files = [f for f in os.listdir(fitness_path)]
+    
+    all_fitnesses = []
+    for f_file in fitness_files:
+        full_path = os.path.join(fitness_path, f_file)
+        fitnesses = read_fitness_from_file(full_path)
+        all_fitnesses.append(fitnesses)
+        
+    # Plotting
+    plot_average_fitness_per_generation(all_fitnesses)
+    plot_fitness_per_genome(all_fitnesses)
 
-# Create the scatter plot
-plt.scatter(x, all_rewards_alt, marker='.', color='orange', label='Data points')
-plt.plot(x, y_pred, color='#6688FF', linestyle='dashed', label='Trendline')
---------------------------------------------------------------------------------
-polynomial
---------------------------------------------------------------------------------
-from sklearn.preprocessing import PolynomialFeatures
 
-x = np.arange(len(all_rewards_alt)).reshape(-1, 1)
 
-# Fit a polynomial regression model
-degree = 2  # Choose the degree of the polynomial
-poly_features = PolynomialFeatures(degree=degree)
-x_poly = poly_features.fit_transform(x)
-model = LinearRegression()
-model.fit(x_poly, all_rewards_alt)
-y_pred = model.predict(x_poly)
-
-# Create the scatter plot
-plt.scatter(x, all_rewards_alt, marker='o', color='orange', label='Data points')
-plt.plot(x, y_pred, color='#6688FF', linestyle='dashed', label=f'Degree {degree} Polynomial Fit')
-
-"""
+if __name__ == '__main__':
+    main()

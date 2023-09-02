@@ -22,7 +22,7 @@ RUN cd gym_torcs/vtorcs-RL-color/ && \
     make datainstall
 
 # Install Python dependencies
-RUN pip3 install numpy torch torchvision torchaudio gym neat-python
+RUN pip3 install numpy torch torchvision torchaudio gym neat-python matplotlib
 
 # Configure ALSA to use null driver
 RUN echo 'pcm.!default {' > ~/.asoundrc && \
