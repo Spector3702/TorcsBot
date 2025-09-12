@@ -5,6 +5,7 @@
     ```sh=
     export PYTHONPATH="${PYTHONPATH}:$(pwd)"
     ```
+## There is two options you can run in this project
 
 ## Run DDPG
 * Train
