@@ -5,7 +5,7 @@
     ```sh=
     export PYTHONPATH="${PYTHONPATH}:$(pwd)"
     ```
-
+## There are two options that you can choose to impliment
 ## Run DDPG
 * Train
     ```sh=
